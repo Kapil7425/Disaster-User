@@ -62,10 +62,10 @@ class EmergencyService {
           'notifiedCount': data['notifiedCount'] ?? 0,
         };
       } else {
-        print('❌ Alert creation failed: \${data['message']}');
+        print('❌ Alert creation failed: ${data["message"]}');
         return {
           'success': false,
-          'message': data['message'] ?? 'Failed to create alert (HTTP \${response.statusCode})',
+          'message': data['message'] ?? 'Failed to create alert (HTTP ${response.statusCode})',
           'error': data['error'] ?? '',
         };
       }
