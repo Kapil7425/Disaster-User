@@ -3,6 +3,7 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
+import 'create_alert_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final UserModel user;
@@ -218,15 +219,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: [
                           _buildActionButton(
                             icon: Icons.sos,
-                            label: 'Emergency Request',
+                            label: 'Emergency Alert',
                             color: Colors.red,
-                            onPressed: () {
-                              // TODO: Navigate to emergency request screen
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Emergency request feature coming soon'),
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CreateAlertScreen(user: _currentUser),
                                 ),
                               );
+                              
+                              if (result == true && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('✅ Emergency alert sent successfully!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
                             },
                           ),
                           const SizedBox(height: 12),
