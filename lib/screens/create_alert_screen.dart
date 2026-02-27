@@ -74,26 +74,29 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
   Future<void> _createAlert() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _isLoading = true);
+
+    // Try to get location, use default if fails
     if (_currentPosition == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Getting your location... Please wait'),
-          backgroundColor: Colors.orange,
-        ),
-      );
       await _getCurrentLocation();
-      if (_currentPosition == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to get location. Please enable GPS'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
     }
 
-    setState(() => _isLoading = true);
+    // Use 0,0 as fallback so backend still receives the request
+    final double lat = _currentPosition?.latitude ?? 0.0;
+    final double lng = _currentPosition?.longitude ?? 0.0;
+
+    if (lat == 0.0 && lng == 0.0) {
+      setState(() => _isLoading = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('⚠️ Could not get GPS location. Please enable location services and retry.'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
 
     final token = await AuthService.getToken();
 
@@ -102,8 +105,8 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
       token: token ?? '',
       type: _selectedType,
       message: _messageController.text.trim(),
-      latitude: _currentPosition!.latitude,
-      longitude: _currentPosition!.longitude,
+      latitude: lat,
+      longitude: lng,
       address: _addressController.text.trim(),
       range: _range,
       severity: _selectedSeverity,
@@ -114,24 +117,32 @@ class _CreateAlertScreenState extends State<CreateAlertScreen> {
     if (!mounted) return;
 
     if (result['success']) {
-      final notifiedCount = result['data']['notifiedCount'] ?? 0;
-      
+      final notifiedCount = result['notifiedCount'] ?? 0;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '✅ Emergency alert sent successfully!\n$notifiedCount nearby users notified',
+            '✅ Emergency alert sent! $notifiedCount users nearby notified.',
           ),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 4),
         ),
       );
-
-      Navigator.pop(context, true); // Return true to indicate success
+      Navigator.pop(context, true);
     } else {
+      final errorMsg = result['message'] ?? 'Failed to create alert';
+      final extraInfo = result['error'] != null && result['error'].toString().isNotEmpty
+          ? '\nDetails: ${result['error']}'
+          : '';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Failed to create alert'),
+          content: Text('❌ $errorMsg$extraInfo'),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: _createAlert,
+          ),
         ),
       );
     }
