@@ -23,7 +23,9 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      // Temporarily go directly to LoginScreen
+      home: const LoginScreen(),
+      // Enable this later: home: const SplashScreen(),
     );
   }
 }
@@ -43,36 +45,61 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuth() async {
-    // Wait for splash screen animation
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Shorter delay for testing
+      await Future.delayed(const Duration(milliseconds: 500));
 
-    // Check if user is logged in
-    final isLoggedIn = await AuthService.isLoggedIn();
-    
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (isLoggedIn) {
-      // Get user data and navigate to dashboard
-      final user = await AuthService.getUser();
-      if (user != null && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DashboardScreen(user: user),
-          ),
-        );
-        return;
-      }
-    }
-
-    // Navigate to login screen
-    if (mounted) {
+      // Skip auth check for now and go directly to login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const LoginScreen(),
         ),
       );
+
+      /* Uncomment this later when login is working
+      // Check if user is logged in
+      final isLoggedIn = await AuthService.isLoggedIn();
+      
+      if (!mounted) return;
+
+      if (isLoggedIn) {
+        // Get user data and navigate to dashboard
+        final user = await AuthService.getUser();
+        if (user != null && mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardScreen(user: user),
+            ),
+          );
+          return;
+        }
+      }
+
+      // Navigate to login screen
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      }
+      */
+    } catch (e) {
+      print('Error in checkAuth: $e');
+      // On any error, just go to login screen
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      }
     }
   }
 
