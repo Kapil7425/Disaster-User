@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Disaster User App'),
+      home: const MyHomePage(title: 'Disaster User 222 App'),
     debugShowCheckedModeBanner: false,
     );
   }
