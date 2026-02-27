@@ -35,6 +35,15 @@ class EmergencyService {
         }),
       );
 
+      // Guard against non-JSON responses (HTML error pages)
+      final contentType = response.headers['content-type'] ?? '';
+      if (!contentType.contains('application/json')) {
+        return {
+          'success': false,
+          'message': 'Server error (status ${response.statusCode}). Please try again.',
+        };
+      }
+
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
@@ -45,13 +54,14 @@ class EmergencyService {
       } else {
         return {
           'success': false,
-          'message': data['message'] ?? 'Failed to create alert',
+          'message': data['message'] ?? 'Failed to create alert (${response.statusCode})',
         };
       }
     } catch (e) {
+      print('EmergencyService.createAlert error: $e');
       return {
         'success': false,
-        'message': 'Network error: $e',
+        'message': 'Connection failed. Check your internet and try again.',
       };
     }
   }
