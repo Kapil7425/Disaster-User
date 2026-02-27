@@ -151,7 +151,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text('Disaster Response'),
+        title:  IconButton(
+          icon: const Icon(Icons.account_circle),
+          onPressed: () {
+            showGeneralDialog(
+              context: context,
+              barrierDismissible: true,
+              barrierLabel: "Profile",
+              barrierColor: Colors.black26,
+              transitionDuration: const Duration(milliseconds: 300),
+
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return Align(
+                  alignment: Alignment.topCenter,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      margin: EdgeInsets.only(
+                        top: kToolbarHeight +
+                            MediaQuery.of(context).padding.top,
+                      ),
+                      width: double.infinity, // ✅ full width
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(25),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min, // ✅ auto height
+                        children: [
+                          _buildHeader(), // your existing header widget
+                          const SizedBox(height: 15),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Close"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+
+              transitionBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween(
+                    begin: const Offset(0, -1), // slide from top
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                );
+              },
+            );
+          },
+        ),
         backgroundColor: Colors.orange.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -168,7 +234,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildHeader(),
                     const SizedBox(height: 16),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -445,7 +510,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.sos, color: Colors.white, size: 32),
+            // Icon(Icons.sos, color: Colors.white, size: 32),
             SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,8 +524,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     letterSpacing: 1,
                   ),
                 ),
-                Text('Tap to report a disaster',
-                    style: TextStyle(color: Colors.white70, fontSize: 12)),
+                Center(
+                  child: Text('Tap to report a disaster',
+                      style: TextStyle(color: Colors.white70, fontSize: 12)),
+                ),
               ],
             ),
           ],
